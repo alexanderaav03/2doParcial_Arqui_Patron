@@ -14,6 +14,10 @@ Uso:
     (con el venv de ms-ejercicios activado, o llamando directo a su python:
      ms-ejercicios\\venv\\Scripts\\python.exe seed\\seed_instructor_clientes.py)
 
+Contraseña de los usuarios de prueba: variable de entorno SEED_PASSWORD
+(default test1234, SOLO para uso local). Contra Render definir una propia:
+    SEED_PASSWORD='<contraseña-propia>' python seed/seed_instructor_clientes.py
+
 Idempotente: si un instructor/cliente con el mismo email ya existe, no
 se duplica.
 """
@@ -37,6 +41,12 @@ if not DATABASE_URL:
     raise RuntimeError(f"No se encontro DATABASE_URL en {ENV_PATH}")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Contraseña de TODOS los usuarios de prueba (instructor y clientes).
+# test1234 es solo para uso local (docker-compose); contra Render se define
+# SEED_PASSWORD con una contraseña propia (variable de entorno o en el .env).
+SEED_PASSWORD_DEFAULT = "test1234"
+SEED_PASSWORD = os.getenv("SEED_PASSWORD") or SEED_PASSWORD_DEFAULT
 
 
 class Base(DeclarativeBase):
@@ -75,7 +85,7 @@ class Cliente(Base):
 INSTRUCTOR = {
     "nombre": "Carlos Mendez",
     "email": "carlos@gym.com",
-    "password": "test1234",
+    "password": SEED_PASSWORD,
     "especialidad": "Fuerza y acondicionamiento",
 }
 
@@ -84,7 +94,7 @@ CLIENTES = [
         "nombre": "Ana Rojas",
         "objetivo": "Perder grasa",
         "email": "ana@test.com",
-        "password": "test1234",
+        "password": SEED_PASSWORD,
         "peso": 78.5,
         "altura": 165.0,
     },
@@ -92,7 +102,7 @@ CLIENTES = [
         "nombre": "Luis Paz",
         "objetivo": "Ganar masa muscular",
         "email": "luis@test.com",
-        "password": "test1234",
+        "password": SEED_PASSWORD,
         "peso": 70.0,
         "altura": 178.0,
     },
@@ -100,7 +110,7 @@ CLIENTES = [
         "nombre": "Marta Vega",
         "objetivo": "Tonificar",
         "email": "marta@test.com",
-        "password": "test1234",
+        "password": SEED_PASSWORD,
         "peso": 60.0,
         "altura": 162.0,
     },
@@ -165,6 +175,10 @@ def main() -> None:
     db = SessionLocal()
     try:
         print(f"== Seed instructor + clientes (usando {ENV_PATH.name}: {DATABASE_URL}) ==")
+        if SEED_PASSWORD == SEED_PASSWORD_DEFAULT:
+            print("[!] SEED_PASSWORD no definida: usuarios de prueba con la contraseña por defecto (solo uso local)")
+        else:
+            print("[i] Usuarios de prueba con la contraseña de SEED_PASSWORD (los que ya existian no se modifican)")
         instructor = get_or_create_instructor(db)
 
         for c in CLIENTES:

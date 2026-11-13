@@ -1,0 +1,257 @@
+diff --git a/app_movil/lib/features/auth/login_screen.dart b/app_movil/lib/features/auth/login_screen.dart
+index 1896617..42dfc14 100644
+--- a/app_movil/lib/features/auth/login_screen.dart
++++ b/app_movil/lib/features/auth/login_screen.dart
+@@ -1,11 +1,14 @@
+ import 'package:dio/dio.dart';
++import 'package:flutter/foundation.dart' show kDebugMode;
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+ import '../../core/api_client.dart';
+ import 'auth_provider.dart';
+ 
+-// TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
++// Credenciales de los usuarios del seed local. Solo se usan en modo debug
++// (kDebugMode): en el APK release no se precargan ni aparecen los botones de
++// acceso rápido, y el compilador elimina ese código.
+ const String _debugDefaultEmail = "carlos@gym.com";
+ const String _debugDefaultPassword = "test1234";
+ const String _debugAnaEmail = "ana@test.com";
+@@ -20,8 +23,8 @@ class LoginScreen extends ConsumerStatefulWidget {
+ 
+ class _LoginScreenState extends ConsumerState<LoginScreen> {
+   final _formKey = GlobalKey<FormState>();
+-  final _emailCtrl = TextEditingController(text: _debugDefaultEmail);
+-  final _passwordCtrl = TextEditingController(text: _debugDefaultPassword);
++  final _emailCtrl = TextEditingController(text: kDebugMode ? _debugDefaultEmail : '');
++  final _passwordCtrl = TextEditingController(text: kDebugMode ? _debugDefaultPassword : '');
+ 
+   bool _loading = false;
+   bool _obscureText = true;
+@@ -58,7 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
+     }
+   }
+ 
+-  // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
++  // Solo se invoca desde los botones de acceso rápido (únicamente en debug).
+   Future<void> _quickLogin(String email, String password) async {
+     _emailCtrl.text = email;
+     _passwordCtrl.text = password;
+@@ -156,9 +159,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
+                                 textAlign: TextAlign.center,
+                               ),
+                             ],
+-                            // TODO: ELIMINAR antes de entregar/producción - accesos
+-                            // rápidos de login solo mientras las credenciales de
+-                            // seed sigan activas.
++                            // Accesos rápidos con los usuarios del seed: solo en
++                            // modo debug, nunca en el APK release.
++                            if (kDebugMode) ...[
+                               const SizedBox(height: 20),
+                               Text(
+                                 'Acceso rápido (pruebas)',
+@@ -202,6 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
+                                 ],
+                               ),
+                             ],
++                          ],
+                         ),
+                       ),
+                     ),
+diff --git a/app_movil/lib/features/clientes/crear_cliente_screen.dart b/app_movil/lib/features/clientes/crear_cliente_screen.dart
+index 6d1c7bb..2e20fe0 100644
+--- a/app_movil/lib/features/clientes/crear_cliente_screen.dart
++++ b/app_movil/lib/features/clientes/crear_cliente_screen.dart
+@@ -1,6 +1,7 @@
+ import 'dart:math';
+ 
+ import 'package:dio/dio.dart';
++import 'package:flutter/foundation.dart' show kDebugMode;
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+@@ -9,7 +10,9 @@ import 'clientes_provider.dart';
+ 
+ final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+ 
+-// TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
++// Datos para el botón "Autorrellenar". Solo se usan en modo debug
++// (kDebugMode): en el APK release el botón no aparece y el compilador
++// elimina este código.
+ const _debugNombres = [
+   'Pedro Gomez',
+   'Sofia Rivera',
+@@ -91,7 +94,7 @@ class _CrearClienteScreenState extends ConsumerState<CrearClienteScreen> {
+     }
+   }
+ 
+-  // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
++  // Solo se invoca desde el botón "Autorrellenar" (únicamente en debug).
+   void _autorrellenar() {
+     final nombre = _debugNombres[_debugRandom.nextInt(_debugNombres.length)];
+     final objetivo = _debugObjetivos[_debugRandom.nextInt(_debugObjetivos.length)];
+@@ -130,7 +133,9 @@ class _CrearClienteScreenState extends ConsumerState<CrearClienteScreen> {
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                         children: [
+                           Text('Datos del cliente', style: Theme.of(context).textTheme.titleMedium),
+-                          // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
++                          // Autorrellenar con datos de prueba: solo en modo
++                          // debug, nunca en el APK release.
++                          if (kDebugMode)
+                             TextButton.icon(
+                               onPressed: _autorrellenar,
+                               icon: const Icon(Icons.auto_fix_high, size: 18),
+diff --git a/comandos.md b/comandos.md
+index 2ebdad7..0b60bb8 100644
+--- a/comandos.md
++++ b/comandos.md
+@@ -72,6 +72,25 @@ Crear dos `.env` locales (están en .gitignore, NO se suben) con la
+     ms-ejercicios/.env  ->  DATABASE_URL=postgresql://<user>:<password>@<host-externo>/ejercicios?sslmode=require
+     ms-rutinas/.env     ->  DATABASE_URL=postgresql://<user>:<password>@<host-externo>/rutinas?sslmode=require
+ 
++**Contraseña de los usuarios de prueba (OBLIGATORIO contra Render):** los
++seeds crean al instructor (carlos@gym.com) y a los clientes (ana@test.com,
++luis@test.com, marta@test.com) con la contraseña de la variable
++`SEED_PASSWORD`. Si no se define usan `test1234`, que es pública en este
++repo y sirve SOLO para uso local: con el gateway en internet cualquiera
++podría entrar como instructor. Antes de correr los seeds contra Render,
++definir una contraseña propia en la misma terminal:
++
++    # Git Bash
++    export SEED_PASSWORD='<contraseña-propia>'
++    # PowerShell
++    $env:SEED_PASSWORD = '<contraseña-propia>'
++
++(o agregar `SEED_PASSWORD=<contraseña-propia>` al `ms-ejercicios/.env` local,
++que no se sube a git). El seed avisa con `[!]` si está usando la de por
++defecto. Ojo: los seeds no modifican usuarios que ya existen; si ya se
++corrieron contra Render con `test1234`, hay que borrar esos usuarios o
++cambiarles la contraseña antes de volver a correrlos.
++
+ Esperar a que ms-ejercicios y ms-rutinas estén "Live" en Render (crean las
+ tablas al arrancar) y correr los seeds SIN `--docker`, en este orden.
+ Con `uv` se usa Python 3.11 y las mismas versiones que el servicio:
+diff --git a/seed/seed_ejercicios.py b/seed/seed_ejercicios.py
+index b7cfe26..17b931f 100644
+--- a/seed/seed_ejercicios.py
++++ b/seed/seed_ejercicios.py
+@@ -15,6 +15,10 @@ Uso:
+     (con el venv de ms-ejercicios activado, o llamando directo a su python:
+      ms-ejercicios\\venv\\Scripts\\python.exe seed\\seed_ejercicios.py)
+ 
++Contraseña de los usuarios de prueba: variable de entorno SEED_PASSWORD
++(default test1234, SOLO para uso local). Contra Render definir una propia:
++    SEED_PASSWORD='<contraseña-propia>' python seed/seed_ejercicios.py
++
+ Idempotente: si un instructor/ejercicio con el mismo email/nombre ya
+ existe, no se duplica.
+ """
+@@ -47,6 +51,12 @@ if not DATABASE_URL:
+ 
+ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ 
++# Contraseña de TODOS los usuarios de prueba (instructor y clientes).
++# test1234 es solo para uso local (docker-compose); contra Render se define
++# SEED_PASSWORD con una contraseña propia (variable de entorno o en el .env).
++SEED_PASSWORD_DEFAULT = "test1234"
++SEED_PASSWORD = os.getenv("SEED_PASSWORD") or SEED_PASSWORD_DEFAULT
++
+ 
+ class Base(DeclarativeBase):
+     pass
+@@ -89,7 +99,7 @@ class Ejercicio(Base):
+ INSTRUCTOR = {
+     "nombre": "Carlos Mendez",
+     "email": "carlos@gym.com",
+-    "password": "test1234",
++    "password": SEED_PASSWORD,
+     "especialidad": "Fuerza y acondicionamiento",
+ }
+ 
+@@ -314,6 +324,10 @@ def main() -> None:
+     db = SessionLocal()
+     try:
+         print(f"== Seed ejercicios (usando {ENV_PATH.name}: {DATABASE_URL}) ==")
++        if SEED_PASSWORD == SEED_PASSWORD_DEFAULT:
++            print("[!] SEED_PASSWORD no definida: usuarios de prueba con la contraseña por defecto (solo uso local)")
++        else:
++            print("[i] Usuarios de prueba con la contraseña de SEED_PASSWORD (los que ya existian no se modifican)")
+         instructor = get_or_create_instructor(db)
+ 
+         for datos in EJERCICIOS_CON_MEDIA:
+diff --git a/seed/seed_instructor_clientes.py b/seed/seed_instructor_clientes.py
+index f1fa47c..e409bca 100644
+--- a/seed/seed_instructor_clientes.py
++++ b/seed/seed_instructor_clientes.py
+@@ -14,6 +14,10 @@ Uso:
+     (con el venv de ms-ejercicios activado, o llamando directo a su python:
+      ms-ejercicios\\venv\\Scripts\\python.exe seed\\seed_instructor_clientes.py)
+ 
++Contraseña de los usuarios de prueba: variable de entorno SEED_PASSWORD
++(default test1234, SOLO para uso local). Contra Render definir una propia:
++    SEED_PASSWORD='<contraseña-propia>' python seed/seed_instructor_clientes.py
++
+ Idempotente: si un instructor/cliente con el mismo email ya existe, no
+ se duplica.
+ """
+@@ -38,6 +42,12 @@ if not DATABASE_URL:
+ 
+ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ 
++# Contraseña de TODOS los usuarios de prueba (instructor y clientes).
++# test1234 es solo para uso local (docker-compose); contra Render se define
++# SEED_PASSWORD con una contraseña propia (variable de entorno o en el .env).
++SEED_PASSWORD_DEFAULT = "test1234"
++SEED_PASSWORD = os.getenv("SEED_PASSWORD") or SEED_PASSWORD_DEFAULT
++
+ 
+ class Base(DeclarativeBase):
+     pass
+@@ -75,7 +85,7 @@ class Cliente(Base):
+ INSTRUCTOR = {
+     "nombre": "Carlos Mendez",
+     "email": "carlos@gym.com",
+-    "password": "test1234",
++    "password": SEED_PASSWORD,
+     "especialidad": "Fuerza y acondicionamiento",
+ }
+ 
+@@ -84,7 +94,7 @@ CLIENTES = [
+         "nombre": "Ana Rojas",
+         "objetivo": "Perder grasa",
+         "email": "ana@test.com",
+-        "password": "test1234",
++        "password": SEED_PASSWORD,
+         "peso": 78.5,
+         "altura": 165.0,
+     },
+@@ -92,7 +102,7 @@ CLIENTES = [
+         "nombre": "Luis Paz",
+         "objetivo": "Ganar masa muscular",
+         "email": "luis@test.com",
+-        "password": "test1234",
++        "password": SEED_PASSWORD,
+         "peso": 70.0,
+         "altura": 178.0,
+     },
+@@ -100,7 +110,7 @@ CLIENTES = [
+         "nombre": "Marta Vega",
+         "objetivo": "Tonificar",
+         "email": "marta@test.com",
+-        "password": "test1234",
++        "password": SEED_PASSWORD,
+         "peso": 60.0,
+         "altura": 162.0,
+     },
+@@ -165,6 +175,10 @@ def main() -> None:
+     db = SessionLocal()
+     try:
+         print(f"== Seed instructor + clientes (usando {ENV_PATH.name}: {DATABASE_URL}) ==")
++        if SEED_PASSWORD == SEED_PASSWORD_DEFAULT:
++            print("[!] SEED_PASSWORD no definida: usuarios de prueba con la contraseña por defecto (solo uso local)")
++        else:
++            print("[i] Usuarios de prueba con la contraseña de SEED_PASSWORD (los que ya existian no se modifican)")
+         instructor = get_or_create_instructor(db)
+ 
+         for c in CLIENTES:

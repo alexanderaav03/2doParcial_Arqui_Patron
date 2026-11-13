@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api_client.dart';
 import 'auth_provider.dart';
 
-// TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
+// Credenciales de los usuarios del seed local. Solo se usan en modo debug
+// (kDebugMode): en el APK release no se precargan ni aparecen los botones de
+// acceso rápido, y el compilador elimina ese código.
 const String _debugDefaultEmail = "carlos@gym.com";
 const String _debugDefaultPassword = "test1234";
 const String _debugAnaEmail = "ana@test.com";
@@ -20,8 +23,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController(text: _debugDefaultEmail);
-  final _passwordCtrl = TextEditingController(text: _debugDefaultPassword);
+  final _emailCtrl = TextEditingController(text: kDebugMode ? _debugDefaultEmail : '');
+  final _passwordCtrl = TextEditingController(text: kDebugMode ? _debugDefaultPassword : '');
 
   bool _loading = false;
   bool _obscureText = true;
@@ -58,7 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
+  // Solo se invoca desde los botones de acceso rápido (únicamente en debug).
   Future<void> _quickLogin(String email, String password) async {
     _emailCtrl.text = email;
     _passwordCtrl.text = password;
@@ -156,51 +159,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 textAlign: TextAlign.center,
                               ),
                             ],
-                            // TODO: ELIMINAR antes de entregar/producción - accesos
-                            // rápidos de login solo mientras las credenciales de
-                            // seed sigan activas.
-                            const SizedBox(height: 20),
-                            Text(
-                              'Acceso rápido (pruebas)',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: _loading
-                                        ? null
-                                        : () => _quickLogin(_debugDefaultEmail, _debugDefaultPassword),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-                                    ),
-                                    child: Text(
-                                      'Instructor (Carlos)',
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: _loading
-                                        ? null
-                                        : () => _quickLogin(_debugAnaEmail, _debugAnaPassword),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-                                    ),
-                                    child: Text(
-                                      'Cliente (Ana)',
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                      textAlign: TextAlign.center,
+                            // Accesos rápidos con los usuarios del seed: solo en
+                            // modo debug, nunca en el APK release.
+                            if (kDebugMode) ...[
+                              const SizedBox(height: 20),
+                              Text(
+                                'Acceso rápido (pruebas)',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: _loading
+                                          ? null
+                                          : () => _quickLogin(_debugDefaultEmail, _debugDefaultPassword),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                                      ),
+                                      child: Text(
+                                        'Instructor (Carlos)',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: _loading
+                                          ? null
+                                          : () => _quickLogin(_debugAnaEmail, _debugAnaPassword),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                                      ),
+                                      child: Text(
+                                        'Cliente (Ana)',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

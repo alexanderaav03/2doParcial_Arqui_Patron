@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,7 +10,9 @@ import 'clientes_provider.dart';
 
 final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
-// TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
+// Datos para el botón "Autorrellenar". Solo se usan en modo debug
+// (kDebugMode): en el APK release el botón no aparece y el compilador
+// elimina este código.
 const _debugNombres = [
   'Pedro Gomez',
   'Sofia Rivera',
@@ -91,7 +94,7 @@ class _CrearClienteScreenState extends ConsumerState<CrearClienteScreen> {
     }
   }
 
-  // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
+  // Solo se invoca desde el botón "Autorrellenar" (únicamente en debug).
   void _autorrellenar() {
     final nombre = _debugNombres[_debugRandom.nextInt(_debugNombres.length)];
     final objetivo = _debugObjetivos[_debugRandom.nextInt(_debugObjetivos.length)];
@@ -130,12 +133,14 @@ class _CrearClienteScreenState extends ConsumerState<CrearClienteScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Datos del cliente', style: Theme.of(context).textTheme.titleMedium),
-                          // TODO: ELIMINAR antes de entregar/producción - solo para pruebas rápidas
-                          TextButton.icon(
-                            onPressed: _autorrellenar,
-                            icon: const Icon(Icons.auto_fix_high, size: 18),
-                            label: const Text('Autorrellenar'),
-                          ),
+                          // Autorrellenar con datos de prueba: solo en modo
+                          // debug, nunca en el APK release.
+                          if (kDebugMode)
+                            TextButton.icon(
+                              onPressed: _autorrellenar,
+                              icon: const Icon(Icons.auto_fix_high, size: 18),
+                              label: const Text('Autorrellenar'),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),

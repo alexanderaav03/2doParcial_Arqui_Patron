@@ -72,6 +72,25 @@ Crear dos `.env` locales (están en .gitignore, NO se suben) con la
     ms-ejercicios/.env  ->  DATABASE_URL=postgresql://<user>:<password>@<host-externo>/ejercicios?sslmode=require
     ms-rutinas/.env     ->  DATABASE_URL=postgresql://<user>:<password>@<host-externo>/rutinas?sslmode=require
 
+**Contraseña de los usuarios de prueba (OBLIGATORIO contra Render):** los
+seeds crean al instructor (carlos@gym.com) y a los clientes (ana@test.com,
+luis@test.com, marta@test.com) con la contraseña de la variable
+`SEED_PASSWORD`. Si no se define usan `test1234`, que es pública en este
+repo y sirve SOLO para uso local: con el gateway en internet cualquiera
+podría entrar como instructor. Antes de correr los seeds contra Render,
+definir una contraseña propia en la misma terminal:
+
+    # Git Bash
+    export SEED_PASSWORD='<contraseña-propia>'
+    # PowerShell
+    $env:SEED_PASSWORD = '<contraseña-propia>'
+
+(o agregar `SEED_PASSWORD=<contraseña-propia>` al `ms-ejercicios/.env` local,
+que no se sube a git). El seed avisa con `[!]` si está usando la de por
+defecto. Ojo: los seeds no modifican usuarios que ya existen; si ya se
+corrieron contra Render con `test1234`, hay que borrar esos usuarios o
+cambiarles la contraseña antes de volver a correrlos.
+
 Esperar a que ms-ejercicios y ms-rutinas estén "Live" en Render (crean las
 tablas al arrancar) y correr los seeds SIN `--docker`, en este orden.
 Con `uv` se usa Python 3.11 y las mismas versiones que el servicio:
