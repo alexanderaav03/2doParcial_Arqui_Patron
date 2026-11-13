@@ -28,6 +28,14 @@ HOP_BY_HOP_HEADERS = {
     "content-length",
 }
 
+# No se reenvía el Accept-Encoding del cliente: detrás del proxy de Render el
+# servicio destino respondería en Brotli, que httpx no descomprime sin el
+# paquete "brotli", y response.json() fallaría. httpx negocia su propio
+# encoding (gzip/deflate) y entrega upstream.content ya descomprimido, por lo
+# que tampoco se reenvía el Content-Encoding de la respuesta.
+REQUEST_SKIP_HEADERS = HOP_BY_HOP_HEADERS | {"accept-encoding"}
+RESPONSE_SKIP_HEADERS = HOP_BY_HOP_HEADERS | {"content-encoding"}
+
 
 class ProxyService:
     def __init__(self) -> None:
@@ -39,7 +47,7 @@ class ProxyService:
         return {
             key: value
             for key, value in request.headers.items()
-            if key.lower() not in HOP_BY_HOP_HEADERS
+            if key.lower() not in REQUEST_SKIP_HEADERS
         }
 
     @staticmethod
@@ -118,7 +126,7 @@ class ProxyService:
         response_headers = {
             key: value
             for key, value in upstream.headers.items()
-            if key.lower() not in HOP_BY_HOP_HEADERS
+            if key.lower() not in RESPONSE_SKIP_HEADERS
         }
         return Response(
             content=upstream.content,

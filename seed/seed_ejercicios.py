@@ -107,7 +107,7 @@ INSTRUCTOR = {
 # imagen de cada ejercicio son el mismo archivo .mp4 (el .jpg es su primer
 # frame, ver media-ejercicios/imagenes/) subidos con nombre slugificado
 # (solo minusculas/numeros/guiones, sin tildes ni espacios).
-BASE_URL_MEDIA = "https://jfbzyffrggcocrbodbuz.supabase.co/storage/v1/object/public/ejercicios-media"
+BASE_URL_MEDIA = "https://bwzqgzdhlusfgdsqeexu.supabase.co/storage/v1/object/public/ejercicios-media"
 
 # Cada uno con su archivo real en Supabase Storage, descripcion, y valores
 # de referencia sugeridos (varian un poco por ejercicio - los compuestos

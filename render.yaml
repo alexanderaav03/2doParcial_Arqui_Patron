@@ -13,7 +13,7 @@
 #   databases:
 #     - name: gym-db
 #       plan: free
-#       region: oregon
+#       region: virginia
 #       databaseName: ejercicios
 #       user: gym
 # y en ms-ejercicios: DATABASE_URL -> fromDatabase: { name: gym-db, property: connectionString }
@@ -40,7 +40,7 @@ services:
     name: gym-ms-ejercicios
     runtime: docker
     plan: free
-    region: oregon
+    region: virginia
     dockerContext: ./ms-ejercicios
     dockerfilePath: ./ms-ejercicios/Dockerfile
     healthCheckPath: /health
@@ -65,7 +65,7 @@ services:
     name: gym-ms-rutinas
     runtime: docker
     plan: free
-    region: oregon
+    region: virginia
     dockerContext: ./ms-rutinas
     dockerfilePath: ./ms-rutinas/Dockerfile
     healthCheckPath: /health
@@ -82,7 +82,7 @@ services:
     name: gym-gateway
     runtime: docker
     plan: free
-    region: oregon
+    region: virginia
     dockerContext: ./gateway
     dockerfilePath: ./gateway/Dockerfile
     healthCheckPath: /health
