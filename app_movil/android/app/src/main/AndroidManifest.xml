@@ -3,11 +3,9 @@
     <application
         android:label="banco_ejercicios_app"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true">
-        <!-- usesCleartextTraffic: el gateway corre en http:// (no https://) durante
-             desarrollo local/Docker. Quitar esto (o restringirlo con un
-             network_security_config.xml) antes de apuntar a un backend real en producción. -->
+        android:icon="@mipmap/ic_launcher">
+        <!-- Release: solo HTTPS (gateway en Render). El permiso para http:// del
+             desarrollo local/Docker vive únicamente en src/debug/AndroidManifest.xml. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -13,4 +13,6 @@ COPY app ./app
 
 EXPOSE 8002
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
+# Render inyecta $PORT; en docker-compose no existe y se usa 8002.
+# "exec" deja a uvicorn como PID 1 para que reciba las señales de apagado.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8002}"]

@@ -1,0 +1,96 @@
+# Blueprint de Render: 3 web services Docker (gateway, ms-ejercicios, ms-rutinas).
+# Pasos completos en comandos.md -> "Despliegue en Render".
+#
+# Base de datos: UNA instancia de Postgres ya creada en Render, con dos bases
+# dentro (una por microservicio, database-per-service):
+#   .../ejercicios -> ms-ejercicios
+#   .../rutinas    -> ms-rutinas   (creada a mano: CREATE DATABASE rutinas;)
+# La instancia NO se declara acá para que el Blueprint no intente crear otra
+# (el plan gratuito permite una sola). Las DATABASE_URL se cargan a mano
+# (sync: false) con la Internal Database URL de esa instancia.
+#
+# Si se quisiera que el Blueprint cree la instancia, se agregaría:
+#   databases:
+#     - name: gym-db
+#       plan: free
+#       region: oregon
+#       databaseName: ejercicios
+#       user: gym
+# y en ms-ejercicios: DATABASE_URL -> fromDatabase: { name: gym-db, property: connectionString }
+#
+# URLs entre servicios: en el plan gratuito los servicios no reciben tráfico
+# por la red privada, así que se usan las URLs públicas https://<nombre>.onrender.com
+# (confirmar la real en el dashboard, sin barra final). Con plan pago se
+# podrían cambiar por fromService: { type: web, name: <servicio>, property: hostport }.
+#
+# region: debe ser la MISMA región que la instancia de Postgres para poder
+# usar la Internal Database URL. Cambiarla en los 3 servicios si la base está
+# en otra región.
+
+envVarGroups:
+  - name: gym-comun
+    envVars:
+      # Render lo genera una sola vez y lo comparten los 3 servicios
+      # (ms-ejercicios firma los tokens; gateway y ms-rutinas los validan).
+      - key: JWT_SECRET
+        generateValue: true
+
+services:
+  - type: web
+    name: gym-ms-ejercicios
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: ./ms-ejercicios
+    dockerfilePath: ./ms-ejercicios/Dockerfile
+    healthCheckPath: /health
+    buildFilter:
+      paths: ["ms-ejercicios/**"]
+    envVars:
+      - fromGroup: gym-comun
+      - key: DATABASE_URL
+        sync: false # Internal Database URL terminada en /ejercicios
+      - key: JWT_EXPIRE_MINUTES
+        value: "60"
+      - key: SUPABASE_URL
+        sync: false # https://<proyecto>.supabase.co
+      - key: SUPABASE_KEY
+        sync: false # service_role key de Supabase
+      - key: SUPABASE_BUCKET
+        value: ejercicios-media
+      - key: MS_RUTINAS_URL
+        sync: false # https://gym-ms-rutinas.onrender.com
+
+  - type: web
+    name: gym-ms-rutinas
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: ./ms-rutinas
+    dockerfilePath: ./ms-rutinas/Dockerfile
+    healthCheckPath: /health
+    buildFilter:
+      paths: ["ms-rutinas/**"]
+    envVars:
+      - fromGroup: gym-comun
+      - key: DATABASE_URL
+        sync: false # Internal Database URL terminada en /rutinas
+      - key: MS_EJERCICIOS_URL
+        sync: false # https://gym-ms-ejercicios.onrender.com
+
+  - type: web
+    name: gym-gateway
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: ./gateway
+    dockerfilePath: ./gateway/Dockerfile
+    healthCheckPath: /health
+    buildFilter:
+      paths: ["gateway/**"]
+    envVars:
+      - fromGroup: gym-comun
+      - key: MS_EJERCICIOS_URL
+        sync: false # https://gym-ms-ejercicios.onrender.com
+      - key: MS_RUTINAS_URL
+        sync: false # https://gym-ms-rutinas.onrender.com

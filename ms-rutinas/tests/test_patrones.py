@@ -1,6 +1,7 @@
 """Pruebas de los patrones Strategy (CU04) y State (CU07).
 
-Ejecutar desde ms-rutinas:  DATABASE_URL=sqlite:// python -m pytest -q
+Ejecutar desde ms-rutinas:  python -m pytest -q
+(tests/conftest.py define DATABASE_URL=sqlite:// y un JWT_SECRET de prueba)
 """
 from datetime import date, datetime, timedelta
 

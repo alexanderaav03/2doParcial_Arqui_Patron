@@ -3,7 +3,9 @@ from fastapi import HTTPException, status
 
 from app.config import settings
 
-TIMEOUT_SECONDS = 5.0
+# 60 s: en el plan gratuito de Render los servicios se duermen y la primera
+# llamada puede tardar 30-60 s mientras el servicio destino despierta.
+TIMEOUT_SECONDS = 60.0
 
 
 class RutinasClient:

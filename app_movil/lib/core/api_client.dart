@@ -31,8 +31,10 @@ final apiClientProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConfig.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      // 60 s: en el plan gratuito de Render los servicios se duermen y la
+      // primera petición puede tardar 30-60 s mientras despiertan.
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
     ),
   );
 

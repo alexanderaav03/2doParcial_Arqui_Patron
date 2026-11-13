@@ -11,7 +11,9 @@ from app.config import settings
 
 logger = logging.getLogger("gateway")
 
-TIMEOUT_SECONDS = 10.0
+# 60 s: en el plan gratuito de Render los servicios se duermen y la primera
+# llamada puede tardar 30-60 s mientras el servicio destino despierta.
+TIMEOUT_SECONDS = 60.0
 
 HOP_BY_HOP_HEADERS = {
     "connection",

@@ -165,11 +165,13 @@ ms-ejercicios (.env):
 
 ms-rutinas (.env):
   DATABASE_URL=postgresql://user:password@db-rutinas:5432/rutinas
+  JWT_SECRET=<mismo valor que en ms-ejercicios>
   MS_EJERCICIOS_URL=http://ms-ejercicios:8001
 
 Notas:
-- JWT_SECRET debe ser idéntico entre el gateway y ms-ejercicios (quien
-  emite el token) para que la validación funcione correctamente
+- JWT_SECRET debe ser idéntico en los 3 servicios: ms-ejercicios emite el
+  token y el gateway y ms-rutinas lo validan. No tiene valor por defecto:
+  si falta, el servicio no arranca
 - Incluir un archivo .env.example (sin valores reales) en cada carpeta
   de servicio, para que cualquiera pueda levantar el proyecto sabiendo
   qué variables necesita definir
